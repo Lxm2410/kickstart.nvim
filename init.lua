@@ -276,6 +276,30 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
+
+  { -- scala-metal lsp
+    'scalameta/nvim-metals',
+    ft = { 'scala', 'sbt', 'java' },
+    opts = function()
+      local metals_config = require('metals').bare_config()
+      metals_config.on_attach = function(client, bufnr)
+        -- your on_attach function
+      end
+
+      return metals_config
+    end,
+    config = function(self, metals_config)
+      local nvim_metals_group = vim.api.nvim_create_augroup('nvim-metals', { clear = true })
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = self.ft,
+        callback = function()
+          require('metals').initialize_or_attach(metals_config)
+        end,
+        group = nvim_metals_group,
+      })
+    end,
+  },
+
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -968,7 +992,6 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
-
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
